@@ -2,56 +2,117 @@
 
 import Image from 'next/image';
 import { useLottie } from 'lottie-react';
-import photoAnimation from '../public/photoAnimation.json';
+import lottieAnimation from '../public/CountryNameTest.json';
 
-const NEW_ASSETS = [
-    {
-        id: 'image_0',
-        w: 413,
-        h: 209,
-        u: '',
-        p: 'image-1.jpg',
-        e: 1,
-    },
-    {
-        id: 'image_1',
-        w: 150,
-        h: 192,
-        u: '',
-        p: 'image-1.jpg',
-        e: 1,
-    },
-    {
-        id: 'image_2',
-        w: 257,
-        h: 367,
-        u: '',
-        p: 'image-1.jpg',
-        e: 1,
-    },
-    {
-        id: 'image_3',
-        w: 256,
-        h: 427,
-        u: '',
-        p: 'image-1.jpg',
-        e: 1,
-    },
-    {
-        id: 'image_4',
-        w: 357,
-        h: 400,
-        u: '',
-        p: 'image-1.jpg',
-        e: 1,
-    },
+const CONTINENTS = [
+    'Africa',
+    'Antarctica',
+    'Asia',
+    'Australia',
+    'Europe',
+    'North America',
+    'South America',
 ];
 
-photoAnimation.assets = [...NEW_ASSETS];
+// Retrieve the index of an asset in a Lottie file by its ID
+// Returns the index of the asset
+function getAssetIndex({ animation, id }: { animation: any; id: string }) {
+    const assetIndex = animation.assets.findIndex(
+        (asset: any) => asset['id'] === id
+    );
+
+    return assetIndex;
+}
+
+// Replaces a specific asset in a Lottie file
+// Returns the new assets array
+function replaceLottieAsset({
+    animation,
+    newAsset,
+}: {
+    animation: any;
+    newAsset: any;
+}) {
+    const newAssets: any = animation.assets.map((asset: any) => {
+        if (asset['id'] === newAsset.id) {
+            return newAsset;
+        }
+        return asset;
+    });
+
+    return newAssets;
+}
+
+// Replaces a specific text layer in a single Lottie file asset
+// Returns the new layers array
+function replaceLottieText({
+    animationAsset,
+    newText,
+    name,
+}: {
+    animationAsset: any;
+    newText: string;
+    name: string;
+}) {
+    const newLayers: any = animationAsset.layers.map((layer: any) => {
+        if (layer['nm'] === name) {
+            layer.t.d.k[0].s.t = newText;
+            return layer;
+        }
+        return layer;
+    });
+
+    return newLayers;
+}
+
+const NEW_ASSET = {
+    id: 'image_1',
+    w: 840,
+    h: 1044,
+    u: '',
+    p: 'image-1.jpg',
+    e: 1,
+};
+
+// deep copy of the original animation
+const countryCardAnimation = JSON.parse(JSON.stringify(lottieAnimation));
+
+countryCardAnimation.assets = replaceLottieAsset({
+    animation: countryCardAnimation,
+    newAsset: NEW_ASSET,
+});
+
+const assetIndex = getAssetIndex({
+    animation: countryCardAnimation,
+    id: 'comp_0',
+});
+
+countryCardAnimation.assets[assetIndex].layers = replaceLottieText({
+    animationAsset: countryCardAnimation.assets[93],
+    name: 'Country name here',
+    newText: 'New Country',
+});
+
+countryCardAnimation.assets[assetIndex].layers = replaceLottieText({
+    animationAsset: countryCardAnimation.assets[93],
+    name: 'MM/DD/YY',
+    newText: new Date().toLocaleTimeString('en-us', {}),
+});
+
+countryCardAnimation.assets[assetIndex].layers = replaceLottieText({
+    animationAsset: countryCardAnimation.assets[93],
+    name: 'Continent name',
+    newText: CONTINENTS[Math.floor(Math.random() * CONTINENTS.length)],
+});
 
 export default function Home() {
     const { View } = useLottie({
-        animationData: photoAnimation,
+        animationData: lottieAnimation,
+        loop: true,
+    });
+
+    const { View: View2 } = useLottie({
+        animationData: countryCardAnimation,
         loop: true,
     });
 
@@ -59,8 +120,7 @@ export default function Home() {
         <main className='flex min-h-screen flex-col items-center justify-between p-24'>
             <div className='z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex'>
                 <p className='fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30'>
-                    Get started by editing&nbsp;
-                    <code className='font-mono font-bold'>app/page.tsx</code>
+                    Dynamic Lottie File
                 </p>
                 <div className='fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none'>
                     <a
@@ -82,9 +142,11 @@ export default function Home() {
                 </div>
             </div>
 
+            <h1>Lottie Demo</h1>
+
             <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-                <h1>Lottie Demo</h1>
                 <>{View}</>
+                <>{View2}</>
             </div>
 
             <div className='mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left'>
